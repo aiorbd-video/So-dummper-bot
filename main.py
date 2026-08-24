@@ -11,7 +11,7 @@ user_files = {}
 
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
-    bot.reply_to(message, "🤖 **So Dumper & Patcher Bot**\n\nকাজ শুরু করতে যেকোনো `.so` ফাইল সেন্ড করুন।", parse_mode="Markdown")
+    bot.reply_to(message, "🤖 So Dumper & Patcher Bot\n\nকাজ শুরু করতে যেকোনো .so ফাইল সেন্ড করুন।")
 
 @bot.message_handler(content_types=['document'])
 def handle_docs(message):
@@ -26,7 +26,7 @@ def handle_docs(message):
         file_info = bot.get_file(message.document.file_id)
         downloaded_file = bot.download_file(file_info.file_path)
         
-        # ইউজারের চ্যাট আইডি দিয়ে ফাইল সেভ করা (যাতে কনফ্লিক্ট না হয়)
+        # ইউজারের চ্যাট আইডি দিয়ে ফাইল সেভ করা
         user_file_path = f"{message.chat.id}_{file_name}"
         with open(user_file_path, 'wb') as new_file:
             new_file.write(downloaded_file)
@@ -49,10 +49,10 @@ def handle_docs(message):
 
         output += "-" * 30 + "\n"
         output += f"Total Functions Found: {count}\n\n"
-        output += "✅ **ফাইলটি প্যাচ করতে চাইলে:**\nএখন শুধু Offset এবং Hex Code স্পেস দিয়ে লিখে সেন্ড করুন।\n\nউদাহরণ: `14C04 C0035FD6`"
+        output += "✅ ফাইলটি প্যাচ করতে চাইলে:\nএখন শুধু Offset এবং Hex Code স্পেস দিয়ে লিখে সেন্ড করুন。\n\nউদাহরণ: 14C04 C0035FD6"
 
-        # ডাম্প মেসেজ পাঠানো
-        bot.edit_message_text(output, chat_id=message.chat.id, message_id=msg.message_id, parse_mode="Markdown")
+        # ডাম্প মেসেজ পাঠানো (Markdown রিমুভ করা হয়েছে)
+        bot.edit_message_text(output, chat_id=message.chat.id, message_id=msg.message_id)
         
         # ইউজারের ফাইলের স্টেট সেভ রাখা
         user_files[message.chat.id] = user_file_path
@@ -80,7 +80,7 @@ def process_patch_step(message):
     
     parts = text.split()
     if len(parts) != 2:
-        bot.reply_to(message, "⚠️ সঠিক নিয়ম হয়নি। উদাহরণ: `14C04 C0035FD6`\nদয়া করে ফাইলটি আবার সেন্ড করে চেষ্টা করুন।", parse_mode="Markdown")
+        bot.reply_to(message, "⚠️ সঠিক নিয়ম হয়নি। উদাহরণ: 14C04 C0035FD6\nদয়া করে ফাইলটি আবার সেন্ড করে চেষ্টা করুন।")
         if os.path.exists(file_path): os.remove(file_path)
         del user_files[chat_id]
         return
@@ -103,7 +103,7 @@ def process_patch_step(message):
         os.rename(file_path, patched_name)
         
         with open(patched_name, 'rb') as f:
-            bot.send_document(chat_id, f, caption=f"✅ **প্যাচ সফল হয়েছে!**\nOffset: `{offset_hex}`\nHex: `{hex_payload}`", parse_mode="Markdown")
+            bot.send_document(chat_id, f, caption=f"✅ প্যাচ সফল হয়েছে!\nOffset: {offset_hex}\nHex: {hex_payload}")
         
         os.remove(patched_name)
         del user_files[chat_id]
