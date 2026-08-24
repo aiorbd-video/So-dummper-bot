@@ -47,12 +47,27 @@ def handle_docs(message):
                 output += f"0x{symbol.value:08X} : {symbol.name}\n"
                 count += 1
 
-        output += "-" * 30 + "\n"
+                output += "-" * 30 + "\n"
         output += f"Total Functions Found: {count}\n\n"
         output += "✅ ফাইলটি প্যাচ করতে চাইলে:\nএখন শুধু Offset এবং Hex Code স্পেস দিয়ে লিখে সেন্ড করুন。\n\nউদাহরণ: 14C04 C0035FD6"
 
-        # ডাম্প মেসেজ পাঠানো (Markdown রিমুভ করা হয়েছে)
-        bot.edit_message_text(output, chat_id=message.chat.id, message_id=msg.message_id)
+        # ======= এখান থেকে কোড আপডেট করা হয়েছে =======
+        if len(output) > 4000:
+            # ডাম্প অনেক বড় হলে .txt ফাইল হিসেবে পাঠাবে
+            out_filename = f"dump_{file_name}.txt"
+            with open(out_filename, "w", encoding="utf-8") as f:
+                f.write(output)
+            
+            with open(out_filename, "rb") as f:
+                bot.send_document(message.chat.id, f, caption="✅ ডাম্প অনেক বড় হওয়ায় টেক্সট ফাইল হিসেবে দেওয়া হলো।\n\nফাইলটি প্যাচ করতে চাইলে এখন শুধু Offset এবং Hex Code স্পেস দিয়ে লিখে সেন্ড করুন।\nউদাহরণ: 14C04 C0035FD6")
+            
+            # আগের স্ক্যানিং মেসেজটি ডিলিট করে দেওয়া
+            bot.delete_message(chat_id=message.chat.id, message_id=msg.message_id)
+            os.remove(out_filename)
+        else:
+            # ছোট হলে সাধারণ মেসেজ হিসেবে পাঠাবে
+            bot.edit_message_text(output, chat_id=message.chat.id, message_id=msg.message_id)
+        # ==============================================
         
         # ইউজারের ফাইলের স্টেট সেভ রাখা
         user_files[message.chat.id] = user_file_path
